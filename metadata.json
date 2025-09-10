@@ -1,0 +1,5 @@
+{
+  "name": "InclusivoPDF!",
+  "description": "Una aplicación que analiza documentos PDF, sugiere alternativas de lenguaje inclusivo y permite la edición y comparación en tiempo real. El usuario puede cargar un PDF, revisar las sugerencias de la IA una al lado de la otra, editar el texto revisado y descargar la versión final.",
+  "requestFramePermissions": []
+}
