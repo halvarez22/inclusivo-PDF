@@ -5,6 +5,7 @@ import { extractTextFromPdf } from './services/pdfService';
 import { getInclusiveSuggestions } from './services/geminiService';
 import Loader from './components/Loader';
 import ComparisonView from './components/ComparisonView';
+import BackButton from './components/BackButton';
 
 const UploadIcon: React.FC<{className?: string}> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
@@ -151,6 +152,12 @@ const App: React.FC = () => {
 
   return (
     <main className="h-screen w-screen flex flex-col font-sans">
+      {/* Botón flotante para estados Initial y Loading */}
+      {(appState === AppState.Initial || appState === AppState.Loading) && (
+        <div className="fixed top-4 right-4 z-50">
+          <BackButton />
+        </div>
+      )}
       {(appState === AppState.Comparing || appState === AppState.Error) && (
         <header className="flex-shrink-0 bg-gray-900/80 backdrop-blur-sm border-b border-gray-700 shadow-lg z-10">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -159,7 +166,8 @@ const App: React.FC = () => {
                 Agente IA Inclusivo PDF
               </h1>
               <div className="flex items-center space-x-4">
-                 <button 
+                <BackButton />
+                <button 
                   onClick={handleDownload}
                   className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-brand-primary hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-brand-light transition-colors"
                 >
