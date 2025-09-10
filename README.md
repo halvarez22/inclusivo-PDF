@@ -106,3 +106,6 @@ La aplicación identifica y sugiere cambios para:
 ## 🆘 Soporte
 
 Para soporte técnico o preguntas, contacta al equipo de desarrollo.
+
+---
+*Última actualización: $(date)*
