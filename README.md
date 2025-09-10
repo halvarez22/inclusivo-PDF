@@ -108,4 +108,4 @@ La aplicación identifica y sugiere cambios para:
 Para soporte técnico o preguntas, contacta al equipo de desarrollo.
 
 ---
-*Última actualización: $(date)*
+*Última actualización: 2025-01-09*
