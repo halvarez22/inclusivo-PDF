@@ -3,7 +3,7 @@ import { AppState } from './types';
 import type { InclusiveChange } from './types';
 import { extractTextFromPdf } from './services/pdfService';
 import { getInclusiveSuggestions } from './services/geminiService';
-import { downloadDocxWithHighlights } from './services/docxService';
+import { downloadDocxWithHighlights, downloadDocxComparisonTwoColumns } from './services/docxService';
 import { downloadOriginalPdfWithHighlights } from './services/pdfExportService';
 import Loader from './components/Loader';
 import ComparisonView from './components/ComparisonView';
@@ -103,6 +103,10 @@ const App: React.FC = () => {
 
   const handleDownloadWord = async () => {
     await downloadDocxWithHighlights(modifiedText, changes, fileName);
+  };
+
+  const handleDownloadComparisonWord = async () => {
+    await downloadDocxComparisonTwoColumns(originalText, modifiedText, changes, fileName);
   };
 
   const handleDownloadOriginalPdf = async () => {
@@ -249,6 +253,16 @@ const App: React.FC = () => {
                   <span className="whitespace-normal text-left">
                     Descargar Word<br className="hidden sm:block" />
                     con ajustes propuestos
+                  </span>
+                </button>
+                <button
+                  onClick={handleDownloadComparisonWord}
+                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-brand-primary/80 hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-brand-light transition-colors text-center"
+                >
+                  <DownloadIcon className="w-5 h-5 mr-2 flex-shrink-0" />
+                  <span className="whitespace-normal text-left">
+                    Comparativa<br className="hidden sm:block" />
+                    en 2 columnas
                   </span>
                 </button>
                 <button 
