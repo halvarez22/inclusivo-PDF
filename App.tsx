@@ -3,6 +3,8 @@ import { AppState } from './types';
 import type { InclusiveChange } from './types';
 import { extractTextFromPdf } from './services/pdfService';
 import { getInclusiveSuggestions } from './services/geminiService';
+import { downloadDocxWithHighlights } from './services/docxService';
+import { downloadOriginalPdfWithHighlights } from './services/pdfExportService';
 import Loader from './components/Loader';
 import ComparisonView from './components/ComparisonView';
 import BackButton from './components/BackButton';
@@ -99,6 +101,34 @@ const App: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadWord = async () => {
+    await downloadDocxWithHighlights(modifiedText, changes, fileName);
+  };
+
+  const handleDownloadOriginalPdf = async () => {
+    await downloadOriginalPdfWithHighlights(originalText, changes, fileName);
+  };
+
+  const handleDownloadChangesJson = () => {
+    if (!changes.length) return;
+    // Solo enviamos original/inclusive para que la otra IA compare
+    const payload = changes.map(({ original, inclusive }) => ({
+      original,
+      inclusive,
+    }));
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const base = fileName || 'documento';
+    a.href = url;
+    a.download = `cambios_inclusivo_${base.replace(/\.[^.]+$/, '')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const handleReset = () => {
     setAppState(AppState.Initial);
     setOriginalText('');
@@ -181,12 +211,45 @@ const App: React.FC = () => {
               </h1>
               <div className="flex items-center space-x-4">
                 <BackButton />
+                {/* 
+                  Botones avanzados para depuración / uso interno.
+                  Ocultos en producción; pueden reactivarse para análisis de cambios.
+                  
+                  <button
+                    onClick={handleDownloadChangesJson}
+                    disabled={!changes.length}
+                    className="inline-flex items-center justify-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-100 bg-gray-800 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-gray-500 transition-colors"
+                  >
+                    <DownloadIcon className="w-5 h-5 mr-2" />
+                    Exportar cambios (JSON)
+                  </button>
+                  <button 
+                    onClick={handleDownload}
+                    className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-brand-primary hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-brand-light transition-colors"
+                  >
+                    <DownloadIcon className="w-5 h-5 mr-2" />
+                    Descargar
+                  </button>
+                */}
                 <button 
-                  onClick={handleDownload}
-                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-brand-primary hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-brand-light transition-colors"
+                  onClick={handleDownloadOriginalPdf}
+                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-brand-primary hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-brand-light transition-colors text-center"
                 >
-                  <DownloadIcon className="w-5 h-5 mr-2" />
-                  Descargar
+                  <DownloadIcon className="w-5 h-5 mr-2 flex-shrink-0" />
+                  <span className="whitespace-normal text-left">
+                    Descargar Original PDF<br className="hidden sm:block" />
+                    con ajustes detectados
+                  </span>
+                </button>
+                <button 
+                  onClick={handleDownloadWord}
+                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-brand-secondary hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-brand-light transition-colors text-center"
+                >
+                  <DownloadIcon className="w-5 h-5 mr-2 flex-shrink-0" />
+                  <span className="whitespace-normal text-left">
+                    Descargar Word<br className="hidden sm:block" />
+                    con ajustes propuestos
+                  </span>
                 </button>
                 <button 
                   onClick={handleReset}

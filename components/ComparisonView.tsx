@@ -37,6 +37,13 @@ const escapeRegExp = (string: string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
+const normalizeForMatch = (s: string) =>
+  s
+    .replace(/\s+/g, ' ')
+    .replace(/[.,;:!?]/g, '')
+    .trim()
+    .toLowerCase();
+
 const ComparisonView: React.FC<ComparisonViewProps> = ({ originalText, modifiedText, changes, onModifiedTextChange }) => {
   const [activeChangeId, setActiveChangeId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -91,17 +98,24 @@ const ComparisonView: React.FC<ComparisonViewProps> = ({ originalText, modifiedT
       return <span>{text}</span>;
     }
 
-    const phrasesToHighlight = changes.map(c => escapeRegExp(type === 'original' ? c.original : c.inclusive)).filter(p => p.length > 0);
+    const phrasesToHighlight = changes
+      .map(c => type === 'original' ? c.original : c.inclusive)
+      .filter(p => p && p.length > 0)
+      .map(p => escapeRegExp(p));
     
     if (phrasesToHighlight.length === 0) {
         return <span>{text}</span>
     }
 
-    const regex = new RegExp(`(${phrasesToHighlight.join('|')})`, 'g');
+    const regex = new RegExp(`(${phrasesToHighlight.join('|')})`, 'gi');
     const parts = text.split(regex);
 
     return parts.map((part, index) => {
-      const matchingChange = changes.find(c => (type === 'original' ? c.original : c.inclusive) === part);
+      const normPart = normalizeForMatch(part);
+      const matchingChange = changes.find(c => {
+        const target = type === 'original' ? c.original : c.inclusive;
+        return normalizeForMatch(target) === normPart;
+      });
       if (matchingChange) {
         return (
           <Highlight
